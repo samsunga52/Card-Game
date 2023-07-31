@@ -1,0 +1,11 @@
+C:\Users\FullStack\source\repos\CardGame\CardGame\bin\Debug\netcoreapp3.0\CardGame.exe
+C:\Users\FullStack\source\repos\CardGame\CardGame\bin\Debug\netcoreapp3.0\CardGame.deps.json
+C:\Users\FullStack\source\repos\CardGame\CardGame\bin\Debug\netcoreapp3.0\CardGame.runtimeconfig.json
+C:\Users\FullStack\source\repos\CardGame\CardGame\bin\Debug\netcoreapp3.0\CardGame.runtimeconfig.dev.json
+C:\Users\FullStack\source\repos\CardGame\CardGame\bin\Debug\netcoreapp3.0\CardGame.dll
+C:\Users\FullStack\source\repos\CardGame\CardGame\bin\Debug\netcoreapp3.0\CardGame.pdb
+C:\Users\FullStack\source\repos\CardGame\CardGame\obj\Debug\netcoreapp3.0\CardGame.csprojAssemblyReference.cache
+C:\Users\FullStack\source\repos\CardGame\CardGame\obj\Debug\netcoreapp3.0\CardGame.AssemblyInfoInputs.cache
+C:\Users\FullStack\source\repos\CardGame\CardGame\obj\Debug\netcoreapp3.0\CardGame.AssemblyInfo.cs
+C:\Users\FullStack\source\repos\CardGame\CardGame\obj\Debug\netcoreapp3.0\CardGame.dll
+C:\Users\FullStack\source\repos\CardGame\CardGame\obj\Debug\netcoreapp3.0\CardGame.pdb

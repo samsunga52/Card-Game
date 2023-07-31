@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CardGame": {
+      "commandName": "Project",
+      "commandLineArgs": "abc.txt xyz.txt"
+    }
+  }
+}
