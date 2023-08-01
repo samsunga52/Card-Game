@@ -164,6 +164,27 @@ namespace CardGame
             return cardviewmodel;
         }
 
+
+        public static CardViewModel dupcard(CardShapesViewModel lsd)
+        {
+            var cardviewmodel = new CardViewModel();
+            cardviewmodel.Cards = new List<Card>();
+            List<string> list = new List<string>();
+            cardviewmodel.Cardshapes = new List<CardShape>();
+
+            foreach (var pair in lsd.CardShapes)
+            {
+                List<string> lst = pair.CardShape.Cast<string>().ToList();
+                cardviewmodel.Cardshapes.Add(new CardShape()
+                {
+                    Suit = lst,
+                    Name = pair.Name
+                });
+            }
+
+            return cardviewmodel;
+        }
+
         public static int GetBaseCardValue(string suit)
         {
             switch (suit.ToUpper())
