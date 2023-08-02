@@ -24,7 +24,6 @@ namespace CardGame
             try
             {
 
-                bool needTieBreak = false;
                 List<Player> tiedTeams = null;
                 int tieScore = 0;
 
