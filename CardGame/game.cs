@@ -66,58 +66,72 @@ namespace CardGame
                 string[] lines = File.ReadAllLines(inputFile);
 
                 // Check if each line contains a valid card
-                foreach (string line in lines)
+
+                try
                 {
-                    if (line.Contains(":"))
+                    foreach (string line in lines)
                     {
-                        // Split the line into player name and card values
-                        string[] parts = line.Split(':');
-                        string playerName = parts[0];
-                        string[] cardValues = parts[1].Trim().Split(',');
-                        if (cardValues.Contains("") || line.EndsWith(","))
+                        if (line.Contains(":"))
                         {
-                            if (line.EndsWith(","))
+                            // Split the line into player name and card values
+                            string[] parts = line.Split(':');
+                            string playerName = parts[0];
+                            string[] cardValues = parts[1].Trim().Split(',');
+                            if (cardValues.Contains("") || line.EndsWith(","))
                             {
-                                using (StreamWriter writer = new StreamWriter(outputFile))
+                                if (line.EndsWith(","))
                                 {
-                                    writer.WriteLine($"Error: Please remove comma from end of players cards");
+                                    using (StreamWriter writer = new StreamWriter(outputFile))
+                                    {
+                                        writer.WriteLine($"Error: Please remove comma from end of players cards");
+                                    }
+                                    return;
                                 }
-                                return;
+                                else if (cardValues.Contains(""))
+                                {
+                                    using (StreamWriter writer = new StreamWriter(outputFile))
+                                    {
+                                        writer.WriteLine($"Error: 5 cards is required to play");
+                                    }
+                                    return;
+                                }
                             }
-                            else if (cardValues.Contains(""))
+                            else
                             {
-                                using (StreamWriter writer = new StreamWriter(outputFile))
-                                {
-                                    writer.WriteLine($"Error: 5 cards is required to play");
-                                }
-                                return;
+
+                                userCards.Add(playerName, cardValues);
                             }
-                        }             
+                        }
                         else
                         {
+                            using (StreamWriter writer = new StreamWriter(outputFile))
+                            {
+                                writer.WriteLine($"Error: Please enter player name seperated by a colon");
+                            }
+                            return;
+                        }
+                        var x = !Regex.IsMatch(line, "[^,]");
 
-                            userCards.Add(playerName, cardValues);
-                        }
-                    }
-                    else
-                    {
-                        using (StreamWriter writer = new StreamWriter(outputFile))
+                        if (x == true)
                         {
-                            writer.WriteLine($"Error: Please enter player name seperated by a colon");
+                            using (StreamWriter writer = new StreamWriter(outputFile))
+                            {
+                                writer.WriteLine($"Error: A comma seperated card array is required to play");
+                            }
+                            return;
                         }
-                        return;
-                    }
-                    var x = !Regex.IsMatch(line, "[^,]");
-                  
-                    if ( x == true)
-                    {
-                        using (StreamWriter writer = new StreamWriter(outputFile))
-                        {
-                            writer.WriteLine($"Error: A comma seperated card array is required to play");
-                        }
-                        return;
                     }
                 }
+                catch (Exception e)
+                {
+
+                    using (StreamWriter writer = new StreamWriter(outputFile))
+                    {
+                        writer.WriteLine($"{e.Message}");
+                    }
+                    return;
+                }
+     
 
                 if (userCards.Count != 7)
                 {
