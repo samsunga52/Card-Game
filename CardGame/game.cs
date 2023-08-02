@@ -7,6 +7,7 @@ using static CardGame.AlphanumericCheck;
 
 namespace CardGame
 {
+    #region GameLogic and Processor
     class game
     {
         static void Main(string[] args)
@@ -236,14 +237,11 @@ namespace CardGame
                 highestScore = players.Max(x => x.Score);
                 CardViewModel duplicatealpha = new CardViewModel();
                 CardModeler nc = new CardModeler();
-                string newCard = "";
                 duplicatealpha = CardHelper.dupcard(csvm);
                 nc.MyProperty = new List<CardViewModel>();
                 nc.MyProperty.Add(duplicatealpha);
-
-                bool trueorfalse = false;
                 bool tie = false;
-                string numbertype = "";
+                string gametype = "";
                 List<string> newcards = new List<string>();
                 string newcard;
                 bool containsThree = false;
@@ -308,28 +306,19 @@ namespace CardGame
 
                             if (tie == false && tiedTeams.Count() == 2 && tieScore == highestScore)
                             {
-                                numbertype = "tie";
+                                gametype = "tie";
                             }
                             else if(tie  == false && checkif2 == true)
                             {
-                                numbertype = "highestscore";
+                                gametype = "highestscore";
                             }
                             else
                             {
-                                numbertype = "score";
+                                gametype = "score";
                             }
                             
-
-
                         }
                     }
-
-
-
-
-
-    
-                    
                 }
 
                 // Create a list to store the winners
@@ -351,7 +340,7 @@ namespace CardGame
                     }
                 }
 
-                if (numbertype == "highestscore")
+                if (gametype == "highestscore")
                 {
                     using (StreamWriter writer = new StreamWriter(outputFile))
                     {
@@ -361,8 +350,7 @@ namespace CardGame
                         }
                     }
                 }
-
-                else if(numbertype == "score")
+                if(gametype == "score")
                 {
                     List<PlayerScores> p = new List<PlayerScores>();
                     using (StreamWriter writer = new StreamWriter(outputFile))
@@ -382,10 +370,9 @@ namespace CardGame
 
                         string score = p.Max(x => x.Score).ToString();
                         writer.WriteLine($"{commaSeparatedString}:{score}");
-                        return;
                     }
                 }
-                else if(numbertype == "tie")
+                if(gametype == "tie")
                 {
                     foreach (string line in lines)
                     {
@@ -561,7 +548,9 @@ namespace CardGame
             }
         }
     }
+    #endregion
 
+    #region ViewModels, Classes and Methods
     public class PlayerCards
     {
         public string Name { get; set; }
@@ -1036,4 +1025,5 @@ namespace CardGame
             }
         }
     }
+    #endregion
 }
