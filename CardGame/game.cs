@@ -7,7 +7,7 @@ using static CardGame.AlphanumericCheck;
 
 namespace CardGame
 {
-    class Program
+    class game
     {
         static void Main(string[] args)
         {
@@ -68,41 +68,91 @@ namespace CardGame
                 // Check if each line contains a valid card
                 foreach (string line in lines)
                 {
-                    // Split the line into player name and card values
-                    string[] parts = line.Split(':');
-                    string playerName = parts[0];
-                    string[] cardValues = parts[1].Trim().Split(',');
-                    if (cardValues.Length != 5)
+                    if (line.Contains(":"))
                     {
-                        Console.WriteLine($"Error: 5 cards is required to play");
-                        return;
-                    }
-                    if (!line.Contains(":"))
-                    {
-                        Console.WriteLine($"Error: Please enter player name seperated by a colon");
-                        return;
+                        // Split the line into player name and card values
+                        string[] parts = line.Split(':');
+                        string playerName = parts[0];
+                        string[] cardValues = parts[1].Trim().Split(',');
+                        if (cardValues.Contains("") || line.EndsWith(","))
+                        {
+                            if (line.EndsWith(","))
+                            {
+                                using (StreamWriter writer = new StreamWriter(outputFile))
+                                {
+                                    writer.WriteLine($"Error: Please remove comma from end of players cards");
+                                }
+                                return;
+                            }
+                            else if (cardValues.Contains(""))
+                            {
+                                using (StreamWriter writer = new StreamWriter(outputFile))
+                                {
+                                    writer.WriteLine($"Error: 5 cards is required to play");
+                                }
+                                return;
+                            }
+                        }             
+                        else
+                        {
+
+                            userCards.Add(playerName, cardValues);
+                        }
                     }
                     else
                     {
-
-                        userCards.Add(playerName, cardValues);
+                        using (StreamWriter writer = new StreamWriter(outputFile))
+                        {
+                            writer.WriteLine($"Error: Please enter player name seperated by a colon");
+                        }
+                        return;
+                    }
+                    var x = !Regex.IsMatch(line, "[^,]");
+                  
+                    if ( x == true)
+                    {
+                        using (StreamWriter writer = new StreamWriter(outputFile))
+                        {
+                            writer.WriteLine($"Error: A comma seperated card array is required to play");
+                        }
+                        return;
                     }
                 }
 
                 if (userCards.Count != 7)
                 {
-                    Console.WriteLine("Error: 7 players required to play.");
+                    using (StreamWriter writer = new StreamWriter(outputFile))
+                    {
+                        writer.WriteLine("Error: 7 players required to play.");
+                    }
                     return;
                 }
                 else if (userCards.Count == 7)
                 {
                     var x = ValidateCards.ValidateInputCards(lines);
-                    foreach (var item in x)
+                    if(x.Count() == 3)
                     {
-                        Console.WriteLine(String.Join("\n", $"{item} has in-correct player cards"));
+                        using (StreamWriter writer = new StreamWriter(outputFile))
+                        {
+                            writer.WriteLine($"Duplicate card suit found, please remove");
+                        }
+                        return;
                     }
-                }
+                    else if(x.Count() >= 1)
+                    {
 
+                        foreach (var item in x)
+                        {
+                            using (StreamWriter writer = new StreamWriter(outputFile))
+                            {
+                                writer.WriteLine(String.Join("\n", $"{item} has in-correct player cards"));
+                            }
+                        }
+                        return;
+                    }
+                  
+                }
+                
 
 
                 // Create a list to store the players and their scores
@@ -197,7 +247,7 @@ namespace CardGame
                 string numbertype = "";
                 List<string> newcards = new List<string>();
                 string newcard;
-
+                bool containsThree = false;
                 List<Player> winners = new List<Player>();
                 if (nc.MyProperty != null)
                 {
@@ -235,9 +285,10 @@ namespace CardGame
                                 }
                             }
                             var sumOfDuplicates = wordCount.Select(x => x.Value).ToList();
-                            int itemToCheck = 2;
+                            int itemToCheck = 2, itemToCheckForThree = 3;
                             //if specified once then tie
                             tie = sumOfDuplicates.Count(x => x == itemToCheck) > 1;
+                            containsThree = sumOfDuplicates.Count(x => x == itemToCheckForThree) == 3;
                             checkif2 = sumOfDuplicates.Contains(2);
 
                             foreach (Player player in players)
@@ -245,7 +296,15 @@ namespace CardGame
                                 if (player.Score == highestScore)
                                 {
                                     winners.Add(player);
+                                 }
+                            }
+
+                            if (containsThree) {
+                                using (StreamWriter writer = new StreamWriter(outputFile))
+                                {
+                                    writer.WriteLine($"Extra card suit found, please remove");
                                 }
+                                return;
                             }
 
                             if (tie == false && tiedTeams.Count() == 2 && tieScore == highestScore)
@@ -378,21 +437,6 @@ namespace CardGame
                             }
                         }
                     }
-                }
-                else
-                {
-
-                }
-
-  
-
-                if (trueorfalse == false && winners.Count() > 1)
-                {
-
-                }
-                else if (trueorfalse == false && winners.Count() > 1)
-                {
-                 
                 }
 
                 Console.WriteLine("The winners have been written to the output file.");
@@ -541,8 +585,6 @@ namespace CardGame
 
     }
 
- 
-
     public class CardShapesViewModel
     {
         public List<CardShapes> CardShapes { get; set; }
@@ -556,28 +598,6 @@ namespace CardGame
 
     public static class AlphanumericCheck
     {
-        public static bool HasDuplicates(List<List<string>> nestedList)
-        {
-            HashSet<string> set = new HashSet<string>();
-
-            foreach (List<string> innerList in nestedList)
-            {
-                foreach (string num in innerList)
-                {
-                    if (set.Contains(num))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        set.Add(num);
-                    }
-                }
-            }
-
-            return false;
-        }
-
         public static bool HasLettersAndNumbersOnly(string value)
         {
             var userScores = value.Split(',').Reverse().ToList<string>();
@@ -590,60 +610,6 @@ namespace CardGame
 
             return isMatch;
         }
-
-
-        public static int GetPlayerScore(int playersco1, int pklascore)
-        {
-            if (playersco1 > pklascore)
-            {
-                return 1;
-            }
-            else if (playersco1 < pklascore)
-            {
-                return 1;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        static int GetTiedCardValue(string cardValue)
-        {
-            switch (cardValue.ToUpper())
-            {
-                case "2":
-                    return 2;
-                case "3":
-                    return 3;
-                case "4":
-                    return 4;
-                case "5":
-                    return 5;
-                case "6":
-                    return 6;
-                case "7":
-                    return 7;
-                case "8":
-                    return 8;
-                case "9":
-                    return 9;
-                case "10":
-                    return 10;
-                case "J":
-                    return 11;
-                case "Q":
-                    return 12;
-                case "K":
-                    return 13;
-                case "A":
-                    return 11;
-                default:
-                    return int.Parse(cardValue);
-            }
-        }
-
-
 
         public class Card
         {
@@ -681,6 +647,394 @@ namespace CardGame
         public class CardModeler
         {
             public List<CardViewModel> MyProperty { get; set; }
+        }
+
+        public class ValidateCards
+        {
+            public static List<string> ValidateInputCards(string[] lines)
+            {
+                // Create a dictionary to store the player's hand
+                Dictionary<string, List<string>> playerHands = new Dictionary<string, List<string>>();
+                List<string> playerWithIncorrect = new List<string>();
+
+                // Process each line in the input file
+                foreach (string line in lines)
+                {
+                    // Split the line into player name and cards
+                    string[] parts = line.Split(':');
+                    string playerName = parts[0].Trim();
+                    string[] cards = parts[1].Split(',');
+
+                    // Create a list to store the player's cards
+                    List<string> playerCards = new List<string>();
+
+                    // Process each card in the line
+                    foreach (string c in cards)
+                    {
+                        // Remove any spaces and convert to uppercase
+                        string trimmedCard = c.Trim().ToUpper();
+
+                        // Add the card to the player's hand
+                        playerCards.Add(trimmedCard);
+                    }
+
+                    // Add the player's hand to the dictionary
+                    playerHands.Add(playerName, playerCards);
+                }
+
+                // Check if an item appears three times
+                List<string> usercards = new List<string>();
+                foreach (KeyValuePair<string, List<string>> playerHand in playerHands)
+                {
+                    foreach (var item in playerHand.Value)
+                    {
+                        usercards.Add(item);
+                    }
+                }
+                string[] usercardarray = usercards.ToArray();
+
+                bool containsDuplicates = usercardarray.GroupBy(x => x).Any(g => g.Count() >= 3);
+
+                var duplicates = usercardarray.GroupBy(x => x).Select(x => x.Key);
+
+                var duplicatecards = usercards.GroupBy(x => x)
+                                    .Where(g => g.Count() >= 3)
+                                    .Select(g => g.Key);
+
+                if (containsDuplicates == true)
+                {
+                    foreach (var item in duplicatecards)
+                    {
+                        foreach (KeyValuePair<string, List<string>> playerHand in playerHands)
+                        {
+                            foreach (var x in playerHand.Value)
+                            {
+                                if (item.Equals(x))
+                                {
+                                    playerWithIncorrect.Add(playerHand.Key);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (KeyValuePair<string, List<string>> playerHand in playerHands)
+                    {
+                        foreach (var item in playerHand.Value)
+                        {
+                            var x = CardHelper.GetBaseCardValue(item);
+
+                            if (x == 0)
+                            {
+                                playerWithIncorrect.Add(playerHand.Key);
+                            }
+                        }
+                        if (playerHand.Value.Count() != 5)
+                        {
+                            playerWithIncorrect.Add(playerHand.Key);
+                        }
+                    }
+                }
+
+
+
+                return playerWithIncorrect;
+            }
+
+        }
+
+        public static class CardHelper
+        {
+            public static List<KeyValuePair<string, string>> FindHighestCard(string playername, string[] card)
+            {
+                List<string> list = card.Cast<string>().ToList();
+                var userShapes1 = new List<KeyValuePair<string, string>>();
+                var userNumbers = new List<KeyValuePair<string, string>>();
+                var scores = new List<KeyValuePair<string, string>>();
+
+                Dictionary<string, int> usertiedCard = new Dictionary<string, int>();
+
+                foreach (var item in list)
+                {
+                    userShapes1.Add(new KeyValuePair<string, string>(playername, item));
+                }
+
+                foreach (var x in userShapes1)
+                {
+                    string cardValue = GetCardValue(x.Value);
+                    scores.Add(new KeyValuePair<string, string>(playername, cardValue));
+                }
+
+                return scores;
+            }
+
+            public static string GetCardValue(string card)
+            {
+                switch (card.ToUpper())
+                {
+                    case "KD":
+                        return 17.ToString() + "," + card;
+                    case "KC":
+                        return 16.ToString() + "," + card;
+                    case "KS":
+                        return 15.ToString() + "," + card;
+                    case "KH":
+                        return 14.ToString() + "," + card;
+                    case "QD":
+                        return 16.ToString() + "," + card;
+                    case "QC":
+                        return 15.ToString() + "," + card;
+                    case "QS":
+                        return 14.ToString() + "," + card;
+                    case "QH":
+                        return 13.ToString() + "," + card;
+                    case "JD":
+                        return 15.ToString() + "," + card;
+                    case "JC":
+                        return 14.ToString() + "," + card;
+                    case "JS":
+                        return 13.ToString() + "," + card;
+                    case "JH":
+                        return 12.ToString() + "," + card;
+                    case "AD":
+                        return 15.ToString() + "," + card;
+                    case "AC":
+                        return 14.ToString() + "," + card;
+                    case "AS":
+                        return 13.ToString() + "," + card;
+                    case "AH":
+                        return 12.ToString() + "," + card;
+                    case "2D":
+                        return 8.ToString() + "," + card;
+                    case "2C":
+                        return 5.ToString() + "," + card;
+                    case "2S":
+                        return 4.ToString() + "," + card;
+                    case "2H":
+                        return 3.ToString() + "," + card;
+                    case "3D":
+                        return 7.ToString() + "," + card;
+                    case "3C":
+                        return 6.ToString() + "," + card;
+                    case "3S":
+                        return 5.ToString() + "," + card;
+                    case "3H":
+                        return 4.ToString() + "," + card;
+                    case "4D":
+                        return 8.ToString() + "," + card;
+                    case "4C":
+                        return 7.ToString() + "," + card;
+                    case "4S":
+                        return 6.ToString() + "," + card;
+                    case "4H":
+                        return 5.ToString() + "," + card;
+                    case "5D":
+                        return 9.ToString() + "," + card;
+                    case "5C":
+                        return 8.ToString() + "," + card;
+                    case "5S":
+                        return 7.ToString() + "," + card;
+                    case "5H":
+                        return 6.ToString() + "," + card;
+                    case "6D":
+                        return 10.ToString() + "," + card;
+                    case "6C":
+                        return 9.ToString() + "," + card;
+                    case "6S":
+                        return 8.ToString() + "," + card;
+                    case "6H":
+                        return 7.ToString() + "," + card;
+                    case "7D":
+                        return 11.ToString() + "," + card;
+                    case "7C":
+                        return 10.ToString() + "," + card;
+                    case "7S":
+                        return 9.ToString() + "," + card;
+                    case "7H":
+                        return 8.ToString() + "," + card;
+                    case "8D":
+                        return 12.ToString() + "," + card;
+                    case "8C":
+                        return 11.ToString() + "," + card;
+                    case "8S":
+                        return 10.ToString() + "," + card;
+                    case "8H":
+                        return 9.ToString() + "," + card;
+                    case "9D":
+                        return 13.ToString() + "," + card;
+                    case "9C":
+                        return 12.ToString() + "," + card;
+                    case "9S":
+                        return 11.ToString() + "," + card;
+                    case "9H":
+                        return 10.ToString() + "," + card;
+                    case "10D":
+                        return 14.ToString() + "," + card;
+                    case "10C":
+                        return 13.ToString() + "," + card;
+                    case "10S":
+                        return 12.ToString() + "," + card;
+                    case "10H":
+                        return 11.ToString() + "," + card;
+                    default:
+                        return card;
+                }
+            }
+
+            public static CardViewModel FindMax(IEnumerable<KeyValuePair<string, string>> lsd)
+            {
+                var cardviewmodel = new CardViewModel();
+                cardviewmodel.Cards = new List<Card>();
+                foreach (KeyValuePair<string, string> pair in lsd)
+                {
+                    string originalValue = pair.Value;
+                    string shape = originalValue.Substring(pair.Value.IndexOf(",") + 1);
+                    string number = originalValue.Substring(0, pair.Value.IndexOf(","));
+                    cardviewmodel.Cards.Add(new Card()
+                    {
+                        Name = pair.Key,
+                        Suit = shape,
+                        Value = Convert.ToInt32(number)
+                    });
+                }
+
+                return cardviewmodel;
+            }
+
+
+            public static CardViewModel dupcard(CardShapesViewModel lsd)
+            {
+                var cardviewmodel = new CardViewModel();
+                cardviewmodel.Cards = new List<Card>();
+                List<string> list = new List<string>();
+                cardviewmodel.Cardshapes = new List<CardShape>();
+
+                foreach (var pair in lsd.CardShapes)
+                {
+                    List<string> lst = pair.CardShape.Cast<string>().ToList();
+                    cardviewmodel.Cardshapes.Add(new CardShape()
+                    {
+                        Suit = lst,
+                        Name = pair.Name
+                    });
+                }
+
+                return cardviewmodel;
+            }
+
+            public static int GetBaseCardValue(string suit)
+            {
+                switch (suit.ToUpper())
+                {
+                    case "KD":
+                        return 4;
+                    case "KC":
+                        return 3;
+                    case "KS":
+                        return 2;
+                    case "KH":
+                        return 1;
+                    case "QD":
+                        return 4;
+                    case "QC":
+                        return 3;
+                    case "QS":
+                        return 2;
+                    case "QH":
+                        return 1;
+                    case "JD":
+                        return 4;
+                    case "JC":
+                        return 3;
+                    case "JS":
+                        return 2;
+                    case "JH":
+                        return 1;
+                    case "AD":
+                        return 4;
+                    case "AC":
+                        return 3;
+                    case "AS":
+                        return 2;
+                    case "AH":
+                        return 1;
+                    case "2D":
+                        return 4;
+                    case "2C":
+                        return 3;
+                    case "2S":
+                        return 2;
+                    case "2H":
+                        return 1;
+                    case "3D":
+                        return 4;
+                    case "3C":
+                        return 3;
+                    case "3S":
+                        return 2;
+                    case "3H":
+                        return 1;
+                    case "4D":
+                        return 4;
+                    case "4C":
+                        return 3;
+                    case "4S":
+                        return 2;
+                    case "4H":
+                        return 1;
+                    case "5D":
+                        return 4;
+                    case "5C":
+                        return 3;
+                    case "5S":
+                        return 2;
+                    case "5H":
+                        return 1;
+                    case "6D":
+                        return 4;
+                    case "6C":
+                        return 3;
+                    case "6S":
+                        return 2;
+                    case "6H":
+                        return 1;
+                    case "7D":
+                        return 4;
+                    case "7C":
+                        return 3;
+                    case "7S":
+                        return 2;
+                    case "7H":
+                        return 1;
+                    case "8D":
+                        return 4;
+                    case "8C":
+                        return 3;
+                    case "8S":
+                        return 2;
+                    case "8H":
+                        return 1;
+                    case "9D":
+                        return 4;
+                    case "9C":
+                        return 3;
+                    case "9S":
+                        return 2;
+                    case "9H":
+                        return 1;
+                    case "10D":
+                        return 4;
+                    case "10C":
+                        return 3;
+                    case "10S":
+                        return 2;
+                    case "10H":
+                        return 1;
+                    default:
+                        return 0;
+                }
+            }
         }
     }
 }
